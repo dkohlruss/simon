@@ -27,12 +27,6 @@ var Game = (function() {
         new Audio('https://s3.amazonaws.com/freecodecamp/simonSound4.mp3'),
         new Audio('http://www.pacdv.com/sounds/mechanical_sound_effects/spring_2.wav'),
         new Audio('http://www.pacdv.com/sounds/applause-sounds/app-20.mp3')];
-    // Sets ListenEvents for buttons
-    setButtonListeners(); // only does this once
-
-    function getArray(arr) {
-        return arr;
-    }
 
     function getMoves(bool) {  // Newgame function
         if (bool === true) {
@@ -182,6 +176,10 @@ var Game = (function() {
     }
 
     function renderLight(color) {
+        audioArray.forEach(function(sound) { // Stops previous sound before starting new sound
+            sound.pause();
+            sound.currentTime = 0;
+        });
         switch(color) {
             case (green):
                 color.style.background = 'palegreen';
@@ -218,5 +216,10 @@ var Game = (function() {
                 break;
         }
     }
+
+    // Sets ListenEvents for buttons
+    return {
+        setButtonListeners: setButtonListeners
+    };
 })();
 
