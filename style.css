@@ -58,13 +58,13 @@ body {
 
 #red {
     background: red;
-    left: 250px;
+    left: 240px;
     border-radius: 0 250px 0 0;
 }
 
 #blue {
     background: blue;
-    left: 250px;
+    left: 240px;
     top: 275px;
     border-radius: 0 0 250px 0;
 }

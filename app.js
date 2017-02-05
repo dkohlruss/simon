@@ -112,8 +112,6 @@ var Game = (function() {
 
             }, 1500);
         }
-
-
     }
 
     // Listeners for all buttons
@@ -147,6 +145,8 @@ var Game = (function() {
                 strictLight.style.background = "#2D2D2D";
             }
         });
+
+        setPointerEvent(false); // Turns off pointer events until game starts
     }
 
     function setPointerEvent(bool) {
