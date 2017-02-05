@@ -5,7 +5,8 @@ var Game = (function() {
     var userArray = [];
     var counter = 0; // Counter for moveLoop
     var totalMoves = 0; // Counter for user Input
-    var round = 1 ; // CHANGE THIS TO 1
+    var round = 1 ;
+    var timeouts = []; // Array of all timeouts
 
     // Get elements
     var red = document.querySelector('#red');
@@ -17,10 +18,15 @@ var Game = (function() {
     var reset = document.querySelector('#reset');
     var display = document.querySelector('#counter');
     var strictLight = document.querySelector('#strict-light');
+    var strictMode = false;
 
     // Handle audio
-    var audioArray = [new Audio('https://s3.amazonaws.com/freecodecamp/simonSound1.mp3'), new Audio('https://s3.amazonaws.com/freecodecamp/simonSound2.mp3'), new Audio('https://s3.amazonaws.com/freecodecamp/simonSound3.mp3'), new Audio('https://s3.amazonaws.com/freecodecamp/simonSound4.mp3')];
-
+    var audioArray = [new Audio('https://s3.amazonaws.com/freecodecamp/simonSound1.mp3'),
+        new Audio('https://s3.amazonaws.com/freecodecamp/simonSound2.mp3'),
+        new Audio('https://s3.amazonaws.com/freecodecamp/simonSound3.mp3'),
+        new Audio('https://s3.amazonaws.com/freecodecamp/simonSound4.mp3'),
+        new Audio('http://www.pacdv.com/sounds/mechanical_sound_effects/spring_2.wav'),
+        new Audio('http://www.pacdv.com/sounds/applause-sounds/app-20.mp3')];
     // Sets ListenEvents for buttons
     setButtonListeners(); // only does this once
 
@@ -49,7 +55,7 @@ var Game = (function() {
     }
 
     function moveLoopButtonDown() {
-        setTimeout(function() {
+        var buttondown = setTimeout(function() {
             renderLight(buttons[gameArray[counter]]);
             moveLoopButtonUp(buttons[gameArray[counter]]);
             counter++;
@@ -60,48 +66,57 @@ var Game = (function() {
                 counter = 0;
             }
         }, 1000);
+        timeouts.push(buttondown);
     }
 
     function moveLoopButtonUp(color) {
-        setTimeout(function() {
+        var buttonup = setTimeout(function() {
             renderLightOff(color);
         },300);
+        timeouts.push(buttonup);
     }
 
     function checkAccuracy() {
         // Compare all values of userArray with gameArray
         // Has to match start of array and each value must match and userArray must be < gameArray
-        console.log(userArray);
-        console.log(userArray.length);
-        console.log(gameArray.slice(0,counter).length);
-
         if (userArray[totalMoves] === gameArray[totalMoves] && userArray.length <= gameArray.slice(0,round).length) {
-            console.log("right");
-            // Everything is ok!
-           totalMoves++;
+            // Successful button press
+            totalMoves++;
+            if (userArray.length === round) {
+                totalMoves = 0;
+                round++;
+                if (round === 21) { // User has won -- reset game
+                    audioArray[5].play();
+                    setTimeout(function() {
+                        getMoves(true);
+                    }, 10000);
+                }
+                setPointerEvent(false); // End of round -- Start next round
+                setTimeout(function() {
+                    getMoves(false);
+                }, 1500);
+            }
         } else {
             // Failure
-            // TODO: Add boolean conditioning for strict mode (if strict getMoves true)
+            setTimeout(function() {
+                audioArray[4].play();
+            }, 500);
             setPointerEvent(false);
             counter = 0;
-            console.log('fail');
             setTimeout(function() {
-                getMoves(false);
-            }, 1000);
+                if (!strictMode) { // If not in strict mode, does not generate a new array & restart
+                    getMoves(false);
+                } else {
+                    getMoves(true);
+                }
+
+            }, 1500);
         }
 
-        if (userArray.length === round) {
-            console.log("WIN THIS ROUND!");
-            totalMoves = 0;
-            round++;
-            setPointerEvent(false);
-            setTimeout(function() {
-                getMoves(false);
-            }, 1000);
-        }
+
     }
 
-    // bool true = turn on, false = turn off
+    // Listeners for all buttons
     function setButtonListeners() {
         buttons.forEach(function(button) {
             button.addEventListener('mousedown',function() {
@@ -115,13 +130,22 @@ var Game = (function() {
         });
 
         reset.addEventListener('click', function() {
-            // Code snippit to remove all timeouts from http://stackoverflow.com/questions/8860188/is-there-a-way-to-clear-all-time-outs
-            var id = window.setTimeout(function() {}, 0);
-            while (id--) {
-                window.clearTimeout(id); // will do nothing if no timeout with id is present
+            var i = 0;
+            while (timeouts.length > 0) { // Clears all timeouts for button presses
+                window.clearTimeout(timeouts[i]);
+                timeouts.shift();
             }
-            // Code snippit to remove all timeouts from http://stackoverflow.com/questions/8860188/is-there-a-way-to-clear-all-time-outs
-            getMoves(true);
+                getMoves(true);
+        });
+
+        strict.addEventListener('click', function() {
+            if (!strictMode) {
+                strictMode = true;
+                strictLight.style.background = 'red';
+            } else {
+                strictMode = false;
+                strictLight.style.background = "#2D2D2D";
+            }
         });
     }
 
