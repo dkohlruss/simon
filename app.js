@@ -218,13 +218,5 @@ var Game = (function() {
                 break;
         }
     }
-
-    return {
-        gameArray: gameArray, // remove
-        userArray: userArray, // remove
-        setGameArray: setGameArray, // remove
-        getArray: getArray,
-        getMoves: getMoves // remove
-    };
 })();
 
